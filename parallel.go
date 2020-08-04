@@ -1,4 +1,4 @@
-package lib
+package parallel
 
 import (
 	"fmt"
@@ -43,10 +43,10 @@ func Parallelize(functions ...func() error) []error {
 	return results
 }
 
-//similar to ParallelizeWithValue, expect instead of keeping the order of the functions given, you can
+//similar to ParallelizeWithValue, except instead of keeping the order of the functions given, you can
 //name the functions yourself et lookup the result based on the name.
 //you are responsible for making sure that the names you provide are unique.
-//if 2 function have the same name, one will override the otherwise, nondeterministically
+//if 2 function have the same name, one will override the other, nondeterministically
 func ParallelizeWithNamedValue(functions ...NamedFunction) map[string]ParallelResult {
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(len(functions))
