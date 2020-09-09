@@ -2,12 +2,13 @@ package parallel
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"math"
 	"reflect"
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 type ParallelResult struct {
@@ -206,15 +207,16 @@ func ParallelizeInBatchPayload(mFunc interface{}, payloads [][]interface{}, batc
 	}
 
 	results, errs := ParallelizeInBatch(funcs, batchSize)
+	var overallErr error
 	if len(errs) != 0 {
 		s := make([]string, len(errs))
 		for i, e := range errs {
 			s[i] = e.Error()
 		}
-		return nil, errors.New("error on some parallelized execution: " + strings.Join(s, "\n"))
+		overallErr = errors.New("error on some parallelized execution: " + strings.Join(s, "\n"))
 	}
 	if len(funcOuts) == 0 {
-		return nil, nil
+		return nil, overallErr
 	}
 	if singleItemIndex != -1 {
 		//cast the returned array to array of the right type
@@ -222,7 +224,7 @@ func ParallelizeInBatchPayload(mFunc interface{}, payloads [][]interface{}, batc
 		for i, result := range results {
 			slice.Index(i).Set(reflect.ValueOf(result))
 		}
-		return slice.Interface(), nil
+		return slice.Interface(), overallErr
 	}
-	return results, nil
+	return results, overallErr
 }
