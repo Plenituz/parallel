@@ -28,20 +28,29 @@ func Parallelize(functions ...func() error) []error {
 	waitGroup.Add(len(functions))
 	messages := make(chan ParallelResult, len(functions))
 
-	for _, function := range functions {
-		go func(copy func() error) {
+	for i, function := range functions {
+		go func(i int, copy func() error) {
 			defer waitGroup.Done()
 			e := copy()
-			messages <- ParallelResult{ Error: e }
-		}(function)
+			messages <- ParallelResult{ index: i, Error: e }
+		}(i, function)
 	}
 	waitGroup.Wait()
 	close(messages)
-	results := make([]error, 0, len(functions))
+
+	results := make([]ParallelResult, 0, len(functions))
 	for result := range messages {
-		results = append(results, result.Error)
+		results = append(results, result)
 	}
-	return results
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].index < results[j].index
+	})
+	errs := make([]error, len(results))
+	for i, result := range results {
+		errs[i] = result.Error
+	}
+
+	return errs
 }
 
 //similar to ParallelizeWithValue, except instead of keeping the order of the functions given, you can
