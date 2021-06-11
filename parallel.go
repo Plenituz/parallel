@@ -123,7 +123,7 @@ func ParallelizeInBatch(functions []func() (interface{}, error), batchSize int) 
 		part := functions[:int(max)]
 		functions = functions[int(max):]
 
-		fmt.Println("start batch", len(part))
+		// fmt.Println("start batch", len(part))
 		results := ParallelizeWithValue(part...)
 		for _, result := range results {
 			if result.Error != nil {
