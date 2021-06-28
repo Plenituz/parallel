@@ -1,7 +1,6 @@
 package parallel
 
 import (
-	"fmt"
 	"math"
 	"reflect"
 	"sort"
